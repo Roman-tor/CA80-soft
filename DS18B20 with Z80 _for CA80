@@ -43,7 +43,7 @@ poz_T2:         EQU 8Bh ; pozycja wysw. temp. czujnika T2
 poz_T3:         EQU 0FEC6h ;
 port_DS:        EQU user_port0-2
  ;poz_t8:         equ 8ah
-AA:             EQU 0C000h
+AA:             EQU 7000h
    ; wersja F - dodano wyswietlenie numeru seryjnego - klawisz G
    ; 80-A,B,C WYJ; 82- A,C WYJ, B WEJ; 8A-A,B WYJ, C0-3 WYJ, C4-7 WEJ; 90-A WEJ, B,C WYJ; 9B-A,B,C WEJ
   ; WEJ stan H, WYJ stan L
