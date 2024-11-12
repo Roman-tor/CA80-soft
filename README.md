@@ -6,6 +6,8 @@ opis portów układu 8255 - w MIK 05 p. S. Gardynika
 
 ASide można ściągnąć z
 http://www.theeg.de/aside/index.html - wersja niemiecka Shareware
+program ten emituje plik  HEX o długości rekordu 20h bajtów! /32 dzisiętnie/, jeśli potrzebujesz plik o dł. 10h bajtów musisz go przekonwertować lub otworzyć plik BIN
+i zapisać jako HEX w żądanym formacie
 
 program wyswietla dane też na LCD 20x4, LCD podłączone bezpośrednio do CA, schemat podłączenia w LCD_direct1, autorstwa kol. ZEGAR i mojej 
 
