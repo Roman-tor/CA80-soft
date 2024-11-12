@@ -1,0 +1,34 @@
+00000h                                                           ; suma kontrolna bajtow od <ADR1> do <ADR2>
+00000h            EXPR:                 EQU       0213H          ; pobieranie liczb na stos
+00000h            HILO:                 EQU       023BH          ; HL=HL-1 DE=HL?
+00000h                                            
+00000h                                  ORG       0C000H
+0C000h                                                           ; program relokowalny!!, mozna wpisac w dowolnym obszarze RAM
+0C000h                                            
+0C000h            SUMA_KONTR:                                    ; suma kontrolna RAM <OD>, <DO>, 4. bajtowa
+0C000h 3166FF                           LD        SP,0FF66H      ; stos
+0C003h 21EE0E                           LD        HL,0EEEH       ; "EEE" na wysw. CA
+0C006h E7                               RST       20H            ; E7 wysw. HL
+0C007h 35                               DEFB      35H
+0C008h            SUK:                            
+0C008h D7                               RST       10H            ; D7
+0C009h 40                               DEFB      40H
+0C00Ah DD210000                         LD        IX,0
+0C00Eh 010000                           LD        BC,0
+0C011h DDE5                             PUSH      IX
+0C013h 0E02                             LD        C,2            ; dwa parametry
+0C015h CD1302                           CALL      EXPR           ; pobierz dwa adresy, od i do
+0C018h 40                               DEFB      40H
+0C019h D1                               POP       DE
+0C01Ah E1                               POP       HL
+0C01Bh            SUK1:                           
+0C01Bh 4E                               LD        C,(HL)
+0C01Ch DD09                             ADD       IX,BC
+0C01Eh CD3B02                           CALL      HILO
+0C021h 30F8                             JR        NC,SUK1
+0C023h DDE5                             PUSH      IX
+0C025h E1                               POP       HL
+0C026h E7                               RST       20H            ; wysw. HL
+0C027h 40                               DEFB      40H
+0C028h CF                               RST       8              ; CF czekaj na klaw
+0C029h 18DD                             JR        SUK
