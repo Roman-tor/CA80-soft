@@ -1,4 +1,4 @@
- ; linia DATA DS 18B20 podlaczona do PB0 - port P2 w CA80 by phill
+ ; linia DATA DS 18B20 podlaczona do PB0 - port P2 /8255/ w CA80 by phill
  ; P2 od lewej: DATA, wolny, GND, +5V 
 COM:         EQU 01ABh ; wysw. znaku z rej. C, podać jeszcze PWYS
 EXPR:        EQU 0213h ; pob. liczb/4./ na stos
