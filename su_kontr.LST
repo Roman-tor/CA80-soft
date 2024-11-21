@@ -1,0 +1,77 @@
+00000h                                                           ; obliczanie sumy kontrolnej pliku HEX, bez pierwszej cyfry 10h /20h/
+00000h            POB_PARAM:            EQU       01F4H          ; pobiera do HL 4. znaki -adres
+00000h            LBYTE:                EQU       18H            ; wysw. rej. A
+00000h            LADR:                 EQU       20H            ; wysw. HL
+00000h            CYF2:                 EQU       0FFF9H
+00000h                                                           ; formaty plikow INTEL HEX  - PRZYKLADY
+00000h                                                           ; : 10 C000 00 31 66 FF D7 80 21 0D CA E7 44 CD F4 01 40 54 5D    32 / 32 TO SUMA KONTROLNA
+00000h                                                           ; : 20 C000 00 31 66 FF D7 80 21 0D CA E7 44 CD F4 01 40 54 5D 06 10 3E F0 94 95 4E 23 91 10 FB DF 20 2B 7D DF   22 / 22 TO SUMA KONTROLNA
+00000h                                  ORG       0XFB00
+0FB00h 3166FF                           LD        SP,0FF66H
+0FB03h            STR:                            
+0FB03h D7                               RST       10H            ; to jest rozkaz D7 80
+0FB04h 80                               DEFB      80H
+0FB05h 210DCA                           LD        HL,0CA0DH
+0FB08h E7                               RST       LADR           ; wysw. HL "CAOd"
+0FB09h 44                               DEFB      44H
+0FB0Ah CDF401                           CALL      POB_PARAM
+0FB0Dh 40                               DEFB      40H
+0FB0Eh            STR1:                           
+0FB0Eh 54                               LD        D,H
+0FB0Fh 5D                               LD        E,L            ; pocz. adres
+0FB10h 0610                             LD        B,10H          ; ilosc bajtów do odczytu; albo 20h jesli drugi przyklad 
+0FB12h 3EF0                             LD        A,0F0H         ;od tej liczby odejmuj kolejno odczytane bajty,
+0FB14h                                                           ;bez pierwszego /=10h/ lub E0 - bez pierwszego 20h w 
+0FB14h 94                               SUB       H              ; starszy bajt adresu
+0FB15h 95                               SUB       L              ; mlodszy bajt adresu
+0FB16h            LICZ:                           
+0FB16h 4E                               LD        C,(HL)
+0FB17h 23                               INC       HL
+0FB18h 91                               SUB       C
+0FB19h 10FB                             DJNZ      LICZ
+0FB1Bh                                                           ; wyswietl adres i sume
+0FB1Bh                                            
+0FB1Bh DF                               RST       LBYTE          ; suma INTEL HEX  DF 20
+0FB1Ch 20                               DEFB      20H
+0FB1Dh 2B                               DEC       HL
+0FB1Eh 7D                               LD        A,L
+0FB1Fh DF                               RST       LBYTE          ; DF wysw. L - adr. konca sumy kontr
+0FB20h 22                               DEFB      22H
+0FB21h E5                               PUSH      HL
+0FB22h 62                               LD        H,D
+0FB23h 6B                               LD        L,E
+0FB24h E7                               RST       LADR
+0FB25h 44                               DEFB      44H
+0FB26h 21F9FF                           LD        HL,CYF2
+0FB29h CBFE                             SET       7,(HL)
+0FB2Bh 23                               INC       HL
+0FB2Ch 23                               INC       HL             ; CYF4
+0FB2Dh CBFE                             SET       7,(HL)
+0FB2Fh E1                               POP       HL
+0FB30h 23                               INC       HL
+0FB31h            POB:                            
+0FB31h CF                               RST       08H            ; to jest CF, czekanie na wciœniecie klawisza
+0FB32h FE12                             CP        12H            ; czy "=" dalej
+0FB34h 28D8                             JR        Z,STR1
+0FB36h FE11                             CP        11H            ; "."  cofnij
+0FB38h 2806                             JR        Z,COFNIJ
+0FB3Ah FE10                             CP        10H            ; "G" nowy adres
+0FB3Ch 28C5                             JR        Z,STR
+0FB3Eh 18F1                             JR        POB
+0FB40h                                            
+0FB40h            COFNIJ:                         
+0FB40h 012000                           LD        BC,0020H       ; lub 0040h gdy przyklad 2 -  : 20 C000 00 ...
+0FB43h ED42                             SBC       HL,BC
+0FB45h 18C7                             JR        STR1
+0FB47h                                            
+0FB47h DDE2                             DEFB      0DDH,0E2H      ; marker nazwy
+0FB49h 2053554D41                       DEFM      " SUMA HEX INTEL",255
+0FB59h                                            
+0FB59h                                            
+0FB59h                                            
+0FB59h                                            
+0FB59h                                            
+0FB59h                                            
+0FB59h                                            
+0FB59h                                            
+0FB59h                                            
