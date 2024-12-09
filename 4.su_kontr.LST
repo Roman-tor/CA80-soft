@@ -19,7 +19,7 @@
 0FB0Eh            STR1:                           
 0FB0Eh 54                               LD        D,H
 0FB0Fh 5D                               LD        E,L            ; pocz. adres
-0FB10h 0610                             LD        B,10H          ; ilosc bajtÛw do odczytu; albo 20h jesli drugi przyklad 
+0FB10h 0610                             LD        B,10H          ; ilosc bajt√≥w do odczytu; albo 20h jesli drugi przyklad 
 0FB12h 3EF0                             LD        A,0F0H         ;od tej liczby odejmuj kolejno odczytane bajty,
 0FB14h                                                           ;bez pierwszego /=10h/ lub E0 - bez pierwszego 20h w 
 0FB14h 94                               SUB       H              ; starszy bajt adresu
@@ -50,7 +50,7 @@
 0FB2Fh E1                               POP       HL
 0FB30h 23                               INC       HL
 0FB31h            POB:                            
-0FB31h CF                               RST       08H            ; to jest CF, czekanie na wciúniecie klawisza
+0FB31h CF                               RST       08H            ; to jest CF, czekanie na wci≈ìniecie klawisza
 0FB32h FE12                             CP        12H            ; czy "=" dalej
 0FB34h 28D8                             JR        Z,STR1
 0FB36h FE11                             CP        11H            ; "."  cofnij
