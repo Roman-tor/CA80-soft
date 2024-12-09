@@ -19,7 +19,7 @@ CYF2:      EQU 0FFF9h
    STR1:
   ld D, H
   ld E, L ; pocz. adres
-  ld b, 10h ; ilosc bajtÛw do odczytu; albo 20h jesli drugi przyklad 
+  ld b, 10h ; ilosc bajt√≥w do odczytu; albo 20h jesli drugi przyklad 
   ld a, 0F0h ;od tej liczby odejmuj kolejno odczytane bajty,
             ;bez pierwszego /=10h/ lub E0 - bez pierwszego 20h w 
   sub h  ; starszy bajt adresu
@@ -50,7 +50,7 @@ CYF2:      EQU 0FFF9h
   pop HL
   inc HL
  POB:
-  rst 08h ; to jest CF, czekanie na wciúniecie klawisza
+  rst 08h ; to jest CF, czekanie na wci≈ìniecie klawisza
   cp 12h ; czy "=" dalej
   jr z, str1
   cp 11h ; "."  cofnij
