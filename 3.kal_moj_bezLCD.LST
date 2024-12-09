@@ -3,11 +3,11 @@
 00000h                                                           ; date wpisujemy: DDMMRRR i wciskamy "="
 00000h                                                           ; klawisz A - oblicznie ilosci dni pomiedzy dwiema datami
 00000h                                                           ; klawisz C - obliczanie dnia tygodnia - po uruchomieniu rpogramu jestesmy w zlec. A;
-00000h            PRINT:                EQU       01D4H          ; wyúwietla tekst wg (HL), + PWyúw CD D4 01 44, po ostatnim zanku musi byc FF
-00000h            PARAM:                EQU       01F4H          ; pobiera bajty do hl, podaÊ PWYS
+00000h            PRINT:                EQU       01D4H          ; wy≈õwietla tekst wg (HL), + PWy≈õw CD D4 01 44, po ostatnim zanku musi byc FF
+00000h            PARAM:                EQU       01F4H          ; pobiera bajty do hl, podaƒá PWYS
 00000h            TABM:                 EQU       32DH           ; tabela ograniczen miesiecy CA80
 00000h            CSTS:                 EQU       0FFC3H         ; pobiera znak z klawiatury /flaga C/
-00000h            COM:                  EQU       01ABH          ; wyúw. zawartosc rej. C, podac PWYS
+00000h            COM:                  EQU       01ABH          ; wy≈õw. zawartosc rej. C, podac PWYS
 00000h            CI:                   EQU       0FFC6H         ; czekanie na puszczenie klawisza a potem na wcisniecie
 00000h            CIM:                  EQU       184H           ; jak CSTS
 00000h            HILO:                 EQU       023BH
@@ -15,8 +15,8 @@
 00000h            L2:                   EQU       0C0H           ; pocz. 2. linii
 00000h            L3:                   EQU       94H            ; pocz. 3 linii
 00000h            L4:                   EQU       0D4H           ; pocz. 4. linii
-00000h            CYF0:                 EQU       0FFF7H         ;wyúw. cyfry na pozycji 0 wyúwietlacza CA80
-00000h            CYF1:                 EQU       0FFF8H         ;wyúw. cyfry na pozycji 1
+00000h            CYF0:                 EQU       0FFF7H         ;wy≈õw. cyfry na pozycji 0 wy≈õwietlacza CA80
+00000h            CYF1:                 EQU       0FFF8H         ;wy≈õw. cyfry na pozycji 1
 00000h            CYF2:                 EQU       0FFF9H
 00000h            CYF3:                 EQU       0FFFAH
 00000h            CYF4:                 EQU       0FFFBH
@@ -30,9 +30,9 @@
 00000h            CLR_BUFX:             EQU       0E2CH          ; zerowanie bufora X /j.w +ld hl, FE10
 00000h            MNOZ:                 EQU       0E09H          ; operacja mno?enia bufor?w bufX=bufX*bufY
 00000h            DODAJ:                EQU       0DB0H          ; operacja dodawania bufor?w j.w.
-00000h            KAS_BUFOR:            EQU       0E2CH          ; kas. bufora  do obliczeÒ (podprogr.z kalkulatora)
+00000h            KAS_BUFOR:            EQU       0E2CH          ; kas. bufora  do oblicze≈Ñ (podprogr.z kalkulatora)
 00000h            WPIS_BUF:             EQU       0C57H          ; wpis liczby do bufora
-00000h            WYS_BUF:              EQU       0D41H          ; wyúwietla bufor, podprogram z kalkulatora CA88, do zam_16_na_10
+00000h            WYS_BUF:              EQU       0D41H          ; wy≈õwietla bufor, podprogram z kalkulatora CA88, do zam_16_na_10
 00000h                                            
 00000h                                            
 00000h                                  ORG       0D000H
@@ -595,7 +595,7 @@
 0D341h                                            
 0D341h            WYSW_CZEKAJ:                                   ;
 0D341h 2107D4                           LD        HL,CZEKAJ
-0D344h CDD401                           CALL      PRINT          ; wyÔswietla "czekaj"
+0D344h CDD401                           CALL      PRINT          ; wyƒèswietla "czekaj"
 0D347h 61                               DEFB      61H
 0D348h C9                               RET       
 0D349h                                            
@@ -690,11 +690,11 @@
 0D3EAh 26                               DEFB      26H            ; PWYSW
 0D3EBh C9                               RET       
 0D3ECh                                            
-0D3ECh            PRZES:                                         ; przesuwa tekst na wyúwietlaczu ca80, jesli wcis. jakis klawisz to wyjscie z procedury
+0D3ECh            PRZES:                                         ; przesuwa tekst na wy≈õwietlaczu ca80, jesli wcis. jakis klawisz to wyjscie z procedury
 0D3ECh 4E                               LD        C,(HL)
-0D3EDh CDAB01                           CALL      COM            ; wyúwietla rej. C
-0D3F0h 80                               DEFB      80H            ; to jest parametr PWYú 80
-0D3F1h 0601                             LD        B,1H           ; wartoúÊ opÛünienia
+0D3EDh CDAB01                           CALL      COM            ; wy≈õwietla rej. C
+0D3F0h 80                               DEFB      80H            ; to jest parametr PWY≈õ 80
+0D3F1h 0601                             LD        B,1H           ; warto≈õƒá op√≥≈∫nienia
 0D3F3h CD78D4                           CALL      OPOZ_SZUK      ; tu ewentualne wyjsciej jesli wcisnieto jakis klaw.
 0D3F6h C9                               RET       
 0D3F7h                                            
@@ -715,15 +715,15 @@
 0D40Eh            NIE_MA:                                        ; "nie ma takiej daty"
 0D40Eh 5430790054                       DEFB      54H,30H,79H,0H,54H,77H,0H,31H,77H,78H,30H,79H,0FH,0H
 0D41Ch 5E7731EE00                       DEFB      5EH,77H,31H,0EEH,0
-0D421h            PN:                                            ; poniedzia≥ek
+0D421h            PN:                                            ; poniedzia≈Çek
 0D421h 735C543079                       DEFB      73H,5CH,54H,30H,79H,5EH,0FFH
 0D428h            WT:                                            ; wtorek
 0D428h 3E315C5079                       DEFB      3EH,31H,5CH,50H,79H,78H,0FFH
-0D42Fh            SR:                                            ; úroda
+0D42Fh            SR:                                            ; ≈õroda
 0D42Fh 6D505C5E77                       DEFB      6DH,50H,5CH,5EH,77H,0H,0FFH
 0D436h            CZW:                                           ; czwartek
 0D436h 395B1C7750                       DEFB      39H,5BH,1CH,77H,50H,31H,0FFH
-0D43Dh            PT:                                            ; piπtek
+0D43Dh            PT:                                            ; piƒÖtek
 0D43Dh 7330F73179                       DEFB      73H,30H,0F7H,31H,79H,78H,0FFH
 0D444h            SO:                                            ; sobota
 0D444h 6D5C7C5C31                       DEFB      6DH,5CH,7CH,5CH,31H,77H,0FFH
@@ -742,7 +742,7 @@
 0D478h            OPOZ_SZUK:                      
 0D478h E5                               PUSH      HL             ; i jesli wcisnieto jakis klawisz, wyjscie z procedury
 0D479h            OPOZ_SZUK1:                     
-0D479h CD0E1A                           CALL      1A0EH          ; opÛünienie ok. 0,4 s
+0D479h CD0E1A                           CALL      1A0EH          ; op√≥≈∫nienie ok. 0,4 s
 0D47Ch CDC3FF                           CALL      CSTS           ; pobierz klawisz
 0D47Fh 3802                             JR        C,WYJ1
 0D481h 10F6                             DJNZ      OPOZ_SZUK1
@@ -751,16 +751,16 @@
 0D484h C9                               RET       
 0D485h                                            
 0D485h            PRZELICZ:                       
-0D485h 01F0D8                           LD        BC,0D8F0H      ; (-10.000), uzupe≥nienie do 2 liczby 10.000
+0D485h 01F0D8                           LD        BC,0D8F0H      ; (-10.000), uzupe≈Çnienie do 2 liczby 10.000
 0D488h CDE2D4                           CALL      ZAMIEN_16
-0D48Bh 0118FC                           LD        BC,0FC18H      ; (-1.000, uzupe≥. do 2 liczby 1.000
+0D48Bh 0118FC                           LD        BC,0FC18H      ; (-1.000, uzupe≈Ç. do 2 liczby 1.000
 0D48Eh CDE2D4                           CALL      ZAMIEN_16
 0D491h 019CFF                           LD        BC,0FF9CH      ; (-100)
 0D494h CDE2D4                           CALL      ZAMIEN_16
 0D497h 01F6FF                           LD        BC,0FFF6H      ; (-10)
 0D49Ah CDE2D4                           CALL      ZAMIEN_16
 0D49Dh 7D                               LD        A,L
-0D49Eh 2110FE                           LD        HL,0FE10H      ; poczπtek bufora
+0D49Eh 2110FE                           LD        HL,0FE10H      ; poczƒÖtek bufora
 0D4A1h E5                               PUSH      HL
 0D4A2h CD570C                           CALL      WPIS_BUF
 0D4A5h CDADD4                           CALL      ILE_CYFR
