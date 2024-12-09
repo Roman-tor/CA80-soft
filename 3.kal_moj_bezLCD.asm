@@ -3,17 +3,17 @@
   ; date wpisujemy: DDMMRRR i wciskamy "="
   ; klawisz A - oblicznie ilosci dni pomiedzy dwiema datami
   ; klawisz C - obliczanie dnia tygodnia - po uruchomieniu rpogramu jestesmy w zlec. A;
-PRINT:       EQU 01D4H ; wyúwietla tekst wg (HL), + PWyúw CD D4 01 44, po ostatnim zanku musi byc FF
-PARAM:       EQU 01F4h ; pobiera bajty do hl, podaÊ PWYS
+PRINT:       EQU 01D4H ; wy≈õwietla tekst wg (HL), + PWy≈õw CD D4 01 44, po ostatnim zanku musi byc FF
+PARAM:       EQU 01F4h ; pobiera bajty do hl, podaƒá PWYS
 TABM:        EQU 32DH  ; tabela ograniczen miesiecy CA80
 CSTS:        EQU 0FFC3h; pobiera znak z klawiatury /flaga C/
-COM:         EQU 01ABh ; wyúw. zawartosc rej. C, podac PWYS
+COM:         EQU 01ABh ; wy≈õw. zawartosc rej. C, podac PWYS
 CI:          EQU 0FFC6h; czekanie na puszczenie klawisza a potem na wcisniecie
 CIM:         EQU 184H ; jak CSTS
 hilo:        EQU 023bh
 
-CYF0:        EQU 0FFF7h ;wyúw. cyfry na pozycji 0 wyúwietlacza CA80
-CYF1:        EQU 0FFF8h ;wyúw. cyfry na pozycji 1
+CYF0:        EQU 0FFF7h ;wy≈õw. cyfry na pozycji 0 wy≈õwietlacza CA80
+CYF1:        EQU 0FFF8h ;wy≈õw. cyfry na pozycji 1
 CYF2:        EQU 0FFF9h
 CYF3:        EQU 0FFFAh
 CYF4:        EQU 0FFFBh
@@ -28,9 +28,9 @@ clr_buf:     EQU 0CA0h ; zerowanie bufora
 clr_bufX:    EQU 0E2Ch ; zerowanie bufora X /j.w +ld hl, FE10
 mnoz:        EQU 0E09h ; operacja mno?enia bufor?w bufX=bufX*bufY
 dodaj:       EQU 0Db0h ; operacja dodawania bufor?w j.w.
-kas_bufor:   EQU 0E2Ch ; kas. bufora  do obliczeÒ (podprogr.z kalkulatora)
+kas_bufor:   EQU 0E2Ch ; kas. bufora  do oblicze≈Ñ (podprogr.z kalkulatora)
 wpis_buf:    EQU 0C57h ; wpis liczby do bufora
-wys_buf:     EQU 0D41h ; wyúwietla bufor, podprogram z kalkulatora CA88, do zam_16_na_10
+wys_buf:     EQU 0D41h ; wy≈õwietla bufor, podprogram z kalkulatora CA88, do zam_16_na_10
  
  ORG    0D000h   ; kalendarz wieczny
   ; lata podzielne przez 4, ale nie przez 100 beda przestepne, z wyjatkiem
@@ -590,7 +590,7 @@ kal3: ; sprawdz czy rok przestepny
 
 wysw_czekaj: ;
   ld hl, czekaj
-  call PRINT  ; wyÔswietla "czekaj"
+  call PRINT  ; wyƒèswietla "czekaj"
   defb 61h
   ret
 
@@ -685,11 +685,11 @@ w_dni1: ; wysw. "dn." na ca80 i il. dni na lcd
   defb 26h ; PWYSW
   ret
 
-PRZES: ; przesuwa tekst na wyúwietlaczu ca80, jesli wcis. jakis klawisz to wyjscie z procedury
+PRZES: ; przesuwa tekst na wy≈õwietlaczu ca80, jesli wcis. jakis klawisz to wyjscie z procedury
   LD C, (HL)
-  CALL COM ; wyúwietla rej. C
-   defb 80h; to jest parametr PWYú 80
-  LD B, 1H ; wartoúÊ opÛünienia
+  CALL COM ; wy≈õwietla rej. C
+   defb 80h; to jest parametr PWY≈õ 80
+  LD B, 1H ; warto≈õƒá op√≥≈∫nienia
   CALL opoz_szuk ; tu ewentualne wyjsciej jesli wcisnieto jakis klaw.
   RET
 
@@ -710,15 +710,15 @@ czekaj:
 nie_ma: ; "nie ma takiej daty"
      defb  54h, 30h, 79h, 0h, 54h, 77h, 0h, 31h, 77h, 78h,30h, 79h, 0Fh,0h
      defb  5eh,77h, 31h, 0EEh, 0
-pn: ; poniedzia≥ek
+pn: ; poniedzia≈Çek
      defb 73h, 5ch, 54h, 30h, 79h, 5eh, 0FFh
 wt: ; wtorek
      defb 3eh, 31h, 5ch, 50h, 79h, 78h, 0FFh
-sr:  ; úroda
+sr:  ; ≈õroda
      defb 6dh, 50h, 5ch, 5eh, 77h, 0h, 0FFh
 czw: ; czwartek
      defb 39h, 5bh, 1ch, 77h, 50h,31h, 0FFh
-pt: ; piπtek
+pt: ; piƒÖtek
      defb 73h, 30h, 0F7h,31h, 79h, 78h, 0FFh
 so: ; sobota
      defb 6dh, 5ch, 7ch, 5ch, 31h, 77h, 0FFh
@@ -737,7 +737,7 @@ dn: ; "dn."
 opoz_szuk:
   push hl                ; i jesli wcisnieto jakis klawisz, wyjscie z procedury
  opoz_szuk1:
-  call 1A0Eh; opÛünienie ok. 0,4 s
+  call 1A0Eh; op√≥≈∫nienie ok. 0,4 s
   call CSTS ; pobierz klawisz
   jr c,wyj1
   djnz opoz_szuk1
@@ -746,16 +746,16 @@ opoz_szuk:
   ret
 
 przelicz:
-  ld bc, 0d8F0h ; (-10.000), uzupe≥nienie do 2 liczby 10.000
+  ld bc, 0d8F0h ; (-10.000), uzupe≈Çnienie do 2 liczby 10.000
   call zamien_16
-  ld bc, 0FC18h ; (-1.000, uzupe≥. do 2 liczby 1.000
+  ld bc, 0FC18h ; (-1.000, uzupe≈Ç. do 2 liczby 1.000
   call zamien_16
   ld bc, 0FF9ch ; (-100)
   call zamien_16
   ld bc, 0FFF6h ; (-10)
   call zamien_16
   ld a, l
-  ld hl, 0FE10h ; poczπtek bufora
+  ld hl, 0FE10h ; poczƒÖtek bufora
   push hl
   call wpis_buf
   call ile_cyfr
