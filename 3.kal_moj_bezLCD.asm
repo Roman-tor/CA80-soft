@@ -2,7 +2,7 @@
   ; uwzgledniajacy zmiane kalendarza na gregorianksi - brak dni 5-14.10.1582 - 10 dni
   ; date wpisujemy: DDMMRRR i wciskamy "="
   ; klawisz A - oblicznie ilosci dni pomiedzy dwiema datami
-  ; klawisz C - obliczanie dnia tygodnia - po uruchomieniu rpogramu jestesmy w zlec. A;
+  ; klawisz C - obliczanie dnia tygodnia - po uruchomieniu rpogramu jestesmy w zlec. C;
 PRINT:       EQU 01D4H ; wyświetla tekst wg (HL), + PWyśw CD D4 01 44, po ostatnim zanku musi byc FF
 PARAM:       EQU 01F4h ; pobiera bajty do hl, podać PWYS
 TABM:        EQU 32DH  ; tabela ograniczen miesiecy CA80
