@@ -1,0 +1,408 @@
+00000h                                            
+00000h            PRINT:                EQU       01D4H          ; wyœwietla tekst wg (HL), + PWyœw np. CD D4 01 44
+00000h            KO3:                  EQU       0A23H          ; adres komunikatu "ERROR"
+00000h            CLR:                  EQU       10H            ; czyszczenie wyswietlacza
+00000h            CO:                   EQU       01E0H          ;
+00000h            EXPRW:                EQU       19B4H          ; j.w. ale tylko cyfry dziesietne
+00000h            LCI:                  EQU       0FFE8H         ; liczenie do tylu, -1 co 2 ms
+00000h            CZASK:                EQU       1225H          ; Wysw. MIES/DZIEN np. 5  09 na PWYS 63
+00000h            TI1:                  EQU       8
+00000h            LADR:                 EQU       20H            ;wyswietlenie HL w postaci 4. liczby
+00000h            TABM:                 EQU       32DH           ; tabela ograniczen miesiecy
+00000h            TABD:                 EQU       123FH          ; tabl. dni, symbole literowe, np. PN, WT CA88
+00000h            WYSKOM:               EQU       1217H          ; procedura wysw. dnia tyg. z CA88
+00000h            DATA_M:               EQU       0FE10H         ; pamiec pobranej daty
+00000h            DATA_W:               EQU       0FE20H         ; wzorzec daty do obiczen dnia tygodnia
+00000h                                            
+00000h                                                           ;  - eliminacja dni 5.10.1582 -14.10.1582 - zmiana kalendarza na gregorianski
+00000h                                                           ; uwzglednia tez lata nieprzestepne: 1700, 1800, 1900, 2100                          
+00000h                                            
+00000h                                                           ; kalendarz wyswietla: m-c, dzien, dzien tygodnia,= lub G to rok
+00000h                                                           ;[rok] [.] [m-c] [dzien] [=]
+00000h                                            
+00000h                                                           ; kalendarz wieczny,  wylicza dzien tygodnia wg zadanej daty
+00000h                                                           ; bazowalem na kalendarzu wg S. Gardynika, eleminujac niewielkie bledy w nim zawarte, przy
+00000h                                                           ; wyliczaniu dnia tygodnia
+00000h                                                           ; Oblicza i wyswietla dzien tygodnia w postaci
+00000h                                                           ; symbolicznej /PN, WT itd/ dla lat od 1 do 9999 r., nie bylo roku 0000 /SK/
+00000h                                                           ; #d[ROK][.][MIESIAC][.][DZIEN MIES][=]
+00000h                                                           ; kazdy nastepny rok ZWIEKSZA dzien tygodnia o 1, jesli rok przestepny to o 2
+00000h                                                           ; kazde stulecie ZMNIEJSZA dzien tygodnia o 1 ; jesli przestepny to o 2
+00000h                                                           ; np. 1.1.1999.to piatek, 1.1.2000 to  sobota, 1.1.2001 - poniedzialek, a 1.1.2002 to wtorek
+00000h                                                           ; 1.1.1583 to sobota / brak dni 5-14.10.1582 !!! zmiana kalendarza na gregorianski
+00000h                                                           ; 15.7.1410-bitwa pod Grunwaldem to wtorek
+00000h                                                           ; upadek Konstantynopola 29.5.1453 wtorek
+00000h                                                           ; lata podzielne przez 4 beda przestepne, z wyjatkiem
+00000h                                                           ; tych niepodzielnych przez 400 (lata 1600, 2000, 2400 itd beda w kalendarzu
+00000h                                                           ; gregorianskim przestepne, a 1700, 1800, 1900, 2100, 2300 itd nie).
+00000h                                                           ; przy sprawdzaniu poprawnosci obliczen bazowalem na programie K. Borkowskiego z UMK Torun
+00000h                                                           ; https://www.astro.uni.torun.pl/~kb/Efemerydy/JulianDay.htm
+00000h                                                           ; 1.1.1600 - sobota
+00000h                                                           ; 1.1.1700 - piatek
+00000h                                                           ; 1.1.1800 - sroda
+00000h                                                           ; 1.1.1900 - poniedz
+00000h                                                           ; 1.1.2000 - sobota
+00000h                                            
+00000h                                  ORG       #C000          ; oryginal programu z C800 /MIK 11 str. 161, teraz po moich przerobkach
+0C000h 21EFC1     UD:                   LD        HL,WZOR_DR1    ; wzorzec daty 1.1.0001 to sobota lub 1.1.1583 to sobota
+0C003h 1120FE                           LD        DE,DATA_W      ; wzor daty w RAM
+0C006h 010800                           LD        BC,8
+0C009h EDB0                             LDIR      
+0C00Bh 21FBC1                           LD        HL,R_R
+0C00Eh CDD401                           CALL      PRINT
+0C011h 80                               DEFB      #80
+0C012h 060A                             LD        B,10
+0C014h CD7DC0                           CALL      U4X            ; opoznienie ok. 1 sek
+0C017h            UD1X:                           
+0C017h D7                               RST       CLR
+0C018h 80                               DEFB      80H
+0C019h 0E0D                             LD        C,0DH          ;Nr zlecenia
+0C01Bh CDE001                           CALL      CO
+0C01Eh 17                               DEFB      17H
+0C01Fh 0E03                             LD        C,3            ;3 parametry
+0C021h CDB419                           CALL      EXPRW          ;Tylko cyfr. dziesietne
+0C024h 40                               DEFB      40H
+0C025h 2110FE                           LD        HL,DATA_M      ;Pamiec daty
+0C028h D1                               POP       DE
+0C029h 73                               LD        (HL),E         ;Dzien miesiaca
+0C02Ah D1                               POP       DE
+0C02Bh 23                               INC       HL
+0C02Ch 73                               LD        (HL),E         ;Miesiac
+0C02Dh E1                               POP       HL
+0C02Eh 2212FE                           LD        (DATA_M+2),HL  ;Rok zadany
+0C031h 7C                               LD        A,H            ; zapamietaj stulecie do wysw. daty
+0C032h F5                               PUSH      AF
+0C033h CDCEC1                           CALL      KOR_R          ; korekcja roku, c0 400 lat sa tre same dni tygodnia,
+0C036h                                                           ; wiec np. zamien rok 20xx na 16xx
+0C036h E5                               PUSH      HL
+0C037h CD7AC1                           CALL      SPR5_14        ; czy data lezy miedzy 5 - 14 pazdzier 1582 blad
+0C03Ah B7                               OR        A              ; CY=0 wazne !!
+0C03Bh 218215                           LD        HL,#1582
+0C03Eh ED5B12FE                         LD        DE,(DATA_M+2)  ; rok zadany
+0C042h ED52                             SBC       HL,DE
+0C044h E1                               POP       HL
+0C045h 300A                             JR        NC,UD1A        ; rok zadany <= od 1582, wzor daty 1.1.0001, sobota
+0C047h                                                           ; rok zadany >= 1583
+0C047h ED4BF5C1                         LD        BC,(WZOR_DR1+6); C=6 -sobota, B = 1- bo do nast. roku przest. zostal 1. rok
+0C04Bh ED5BF3C1                         LD        DE,(WZOR_DR1+4);1583 r.
+0C04Fh 1808                             JR        UD1A1
+0C051h            UD1A:                                          ; do 4.10.1582 dni tygodnia beda prawidlowe wg ponizszego wzoru 
+0C051h ED4BF1C1                         LD        BC,(WZOR_DR1+2);C=6 ;B=3 bo nastepny rok przestep za 3 lata, C=6 - sobota
+0C055h ED5BEFC1                         LD        DE,(WZOR_DR1)  ; rok odniesienia 0001
+0C059h 3A13FE     UD1A1:                LD        A,(DATA_M+3)   ; stulecie
+0C05Ch FE20                             CP        #20
+0C05Eh 3808                             JR        C,UD1          ; stulecie < 20
+0C060h ED4BF9C1                         LD        BC,(WZOR_DR1+10)
+0C064h ED5BF7C1                         LD        DE,(WZOR_DR1+8)
+0C068h CDB3C0     UD1:                  CALL      SROK           ; szukanie roku
+0C06Bh ED5B10FE                         LD        DE,(DATA_M)    ; E - dzien, D - miesiac
+0C06Fh CDE6C0                           CALL      SDZIEN         ; szukanie dnia
+0C072h 2810                             JR        Z,U4A          ; dzien znaleziono
+0C074h                                                           ;Error - data falszywa
+0C074h 21230A     UD1_ERR:              LD        HL,KO3         ;Error
+0C077h CDD401                           CALL      PRINT
+0C07Ah 50                               DEFB      50H
+0C07Bh                                                           ;Opoznienie 0.7 sek
+0C07Bh 0607                             LD        B,7
+0C07Dh CD3AC1     U4X:                  CALL      DEL100
+0C080h 10FB                             DJNZ      U4X
+0C082h 1893                             JR        UD1X
+0C084h                                                           ;Wyswietlenie znalezionego dnia
+0C084h                                                           ;WE: C - dzien tygodnia (1-Pn,2-Wt,3-Sr....)
+0C084h            U4A:                            
+0C084h F1                               POP       AF             ; odtworz zadane stulecie 
+0C085h 3213FE                           LD        (DATA_M+3),A
+0C088h CD44C1                           CALL      SPR_NP         ; sprawdz czy  nieprzestepny
+0C08Bh 213F12                           LD        HL,TABD        ;Tabl. dni tygodn.
+0C08Eh 79                               LD        A,C
+0C08Fh 3D                               DEC       A
+0C090h 87                               ADD       A,A            ;A*2
+0C091h 85                               ADD       A,L
+0C092h 6F                               LD        L,A            ;Adr. dnia
+0C093h CD1712                           CALL      WYSKOM         ;Wysw.dnia tygodn. np. "So" na PWYS-20
+0C096h D7         U4B:                  RST       CLR
+0C097h 62                               DEFB      62H
+0C098h 2110FE                           LD        HL,DATA_M      ;Zadana data
+0C09Bh CD2512                           CALL      CZASK          ;Wysw. MIES/DZIEN np. 5  09 na PWYS 63
+0C09Eh CF         CZEK:                 RST       TI1            ;                  " 5 09 So"
+0C09Fh FE11                             CP        11H            ;SPAC ?
+0C0A1h CA00C0                           JP        Z,UD           ;Powtorzenie
+0C0A4h D7                               RST       CLR
+0C0A5h 62                               DEFB      62H
+0C0A6h 2A12FE                           LD        HL,(DATA_M+2)  ;ROK  , np. "2024   So"
+0C0A9h E7                               RST       LADR
+0C0AAh 44                               DEFB      44H
+0C0ABh CF                               RST       TI1
+0C0ACh FE11                             CP        11H
+0C0AEh CA00C0                           JP        Z,UD
+0C0B1h 18E3                             JR        U4B
+0C0B3h                                                           ; SROK - szukanie roku
+0C0B3h                                                           ; 0001.01.01 - SOBOTA - dzien odniesienia
+0C0B3h                                                           ; 0001 - rok nieprzestepny, 1700, 1800, 1900, 2100, 2300, 2500 tez
+0C0B3h                                                           ; 365 dni - rok normalny
+0C0B3h                                                           ; 366 dni - rok przestepny co 4 lata
+0C0B3h                                                           ; 52tygodnie * 7 = 364 dni
+0C0B3h                                                           ; WE: DATA+2 - etykieta wskazujaca zadany rok
+0C0B3h                                                           ; HL = zadany rok
+0C0B3h                                                           ; WY: C - dzien tygodnia w dniu 1 stacznia
+0C0B3h                                                           ;    B = co 4. lata - rok przestepny
+0C0B3h            SROK:                           
+0C0B3h B7                               OR        A              ;CY=0
+0C0B4h ED52                             SBC       HL,DE
+0C0B6h C8                               RET       Z              ;Zad.rok=0000
+0C0B7h                                                           ;ROK ZADANY > 0000
+0C0B7h 00                               NOP                      ;INC    C     ;0000 - przestepny
+0C0B8h 7B         P0001:                LD        A,E            ; jednosci i dziesiatki lat
+0C0B9h C601                             ADD       A,1
+0C0BBh 27                               DAA       
+0C0BCh 5F                               LD        E,A
+0C0BDh 7A                               LD        A,D            ; setki i tysiace lat
+0C0BEh CE00                             ADC       A,0            ;Dodanie CY
+0C0C0h 27                               DAA       
+0C0C1h 57                               LD        D,A
+0C0C2h 2A12FE                           LD        HL,(DATA_M+2)  ;Rok zadany
+0C0C5h 0C                               INC       C              ;Rok normalny
+0C0C6h 79                               LD        A,C
+0C0C7h FE08                             CP        8
+0C0C9h 3802                             JR        C,P2A
+0C0CBh 0E01                             LD        C,1            ;Poniedzialek
+0C0CDh 05         P2A:                  DEC       B              ;Czy rok przestepny ?
+0C0CEh 2010                             JR        NZ,P2C         ;Nie
+0C0D0h 0604                             LD        B,4            ;Rok przestepny
+0C0D2h B7                               OR        A              ;CY=0
+0C0D3h ED52                             SBC       HL,DE
+0C0D5h C8                               RET       Z              ;Rok przestepny
+0C0D6h 0C                               INC       C
+0C0D7h 79                               LD        A,C            ;Dzien tygodnia
+0C0D8h FE08                             CP        8
+0C0DAh 3802                             JR        C,P2B
+0C0DCh 0E01                             LD        C,1            ;Poniedzialek
+0C0DEh 18D8       P2B:                  JR        P0001          ;Nastepny rok
+0C0E0h B7         P2C:                  OR        A              ;CY=0
+0C0E1h ED52                             SBC       HL,DE
+0C0E3h 20D3                             JR        NZ,P0001       ;Nastepny rok
+0C0E5h                                                           ; rok znaleziony
+0C0E5h C9                               RET       
+0C0E6h                                                           ;===========
+0C0E6h                                                           ;SDZIEN - szukanie dnia tygodnia w roku
+0C0E6h                                                           ;WE: B= pozostalosc z poprzednich obliczen po dodawaniu lat 
+0C0E6h                                                           ;    C   - dzien tygodnia w dniu 1 stycznia
+0C0E6h                                                           ;    E   - dzien zadany
+0C0E6h                                                           ;    D   - miesiac zadany
+0C0E6h                                                           ;WYJ: C   - znaleziony dzien tygodnia
+0C0E6h                                                           ;    Z=0 - Error (rej.C - nieokreslony)
+0C0E6h                                                           ;ZMIENIA: HL,C,AF
+0C0E6h 78         SDZIEN:               LD        A,B            ; pozostalosc po dodawaniu lat
+0C0E7h FE04                             CP        4              ; czy rok przestepny ?
+0C0E9h 201A                             JR        NZ,NPRZE
+0C0EBh                                                           ; rok przestepny
+0C0EBh 7A                               LD        A,D            ; miesiac zadany
+0C0ECh FE03                             CP        3
+0C0EEh D42FC1                           CALL      NC,INCC        ; miesiac 3-12
+0C0F1h FE02                             CP        2              ; czy luty ?
+0C0F3h 2010                             JR        NZ,NPRZE       ; nie luty
+0C0F5h 7B                               LD        A,E            ; zadany dzien
+0C0F6h FE29                             CP        29H            ; czy 29 luty
+0C0F8h 200B                             JR        NZ,NPRZE
+0C0FAh                                                           ;Zadany dzien 29 luty
+0C0FAh CD93C1                           CALL      SPR_LUTY       ; w 1700, 1800, 1900, 2100 luty nie byl przestepny !
+0C0FDh 0603                             LD        B,3            ;Dodanie 3 dni
+0C0FFh CD2FC1     LICZD:                CALL      INCC
+0C102h 10FB                             DJNZ      LICZD
+0C104h C9                               RET                      ;Z=1 dobrze
+0C105h 212D03     NPRZE:                LD        HL,TABM
+0C108h 0601                             LD        B,1            ;Licznik miesiecy
+0C10Ah 3E01       NASA:                 LD        A,1            ;Licznik dni
+0C10Ch BB         DNAST:                CP        E
+0C10Dh 2008                             JR        NZ,DNA
+0C10Fh                                                           ; dzien zgodny
+0C10Fh F5                               PUSH      AF             ;Ochrona dnia
+0C110h 78                               LD        A,B            ;Miesiac biezacy
+0C111h BA                               CP        D              ;D-miesiac zadany
+0C112h 2002                             JR        NZ,NZG
+0C114h F1                               POP       AF
+0C115h C9                               RET                      ;Z=1 dobrze
+0C116h F1         NZG:                  POP       AF             ;Dzien biezacy
+0C117h B7         DNA:                  OR        A              ;CY=0
+0C118h 3C                               INC       A
+0C119h 27                               DAA       
+0C11Ah CDB4C1                           CALL      SPR_X_1582     ; pazdziernik 1582
+0C11Dh CD2FC1                           CALL      INCC
+0C120h BE                               CP        (HL)           ;Ost. dzien mies ?
+0C121h 38E9                             JR        C,DNAST        ;Nastepny dzien
+0C123h 78                               LD        A,B
+0C124h 3C                               INC       A
+0C125h 27                               DAA       
+0C126h 47                               LD        B,A            ;Biezacy miesiac
+0C127h 23                               INC       HL             ;Nastepny miesiac
+0C128h 3E39                             LD        A,39H          ;Str.21 w MIK08
+0C12Ah BE                               CP        (HL)           ;mies 13 !!
+0C12Bh 20DD                             JR        NZ,NASA
+0C12Dh B7                               OR        A
+0C12Eh C9                               RET                      ;Z=0 Error
+0C12Fh                                                           ;INCC - zwiekszenie dni tygodnie w rej. C
+0C12Fh F5         INCC:                 PUSH      AF
+0C130h 0C                               INC       C
+0C131h 79                               LD        A,C
+0C132h FE08                             CP        8
+0C134h 3802                             JR        C,INC1
+0C136h 0E01                             LD        C,1            ; poniedzialek
+0C138h F1         INC1:                 POP       AF
+0C139h C9                               RET       
+0C13Ah                                                           ;Opoznienie 100 msek
+0C13Ah C5         DEL100:               PUSH      BC
+0C13Bh 060A                             LD        B,10
+0C13Dh CDE3C1     DEL22:                CALL      DEL10          ;10 mSEK
+0C140h 10FB                             DJNZ      DEL22
+0C142h C1                               POP       BC
+0C143h C9                               RET       
+0C144h                                            
+0C144h            SPR_NP:                                        ; 1700, 1800, 1900, 2100, 2300 to lata nieprzestepne !
+0C144h                                                           ;ld A, D
+0C144h 110300                           LD        DE,3           ; E = 3- marzec, D = 0 dziesiatki i jednosci lat czyli koniec stulecia
+0C147h 3A13FE                           LD        A,(DATA_M+3)   ; stulecie, np. 17xx, 18xx itd
+0C14Ah 0601                             LD        B,1
+0C14Ch FE17                             CP        #17            ; 1700 
+0C14Eh 280B                             JR        Z,DECC1_1      ; B = 1
+0C150h 04                               INC       B
+0C151h FE18                             CP        #18
+0C153h 2806                             JR        Z,DECC1_1      ; B = 2
+0C155h 04                               INC       B
+0C156h FE19                             CP        #19
+0C158h 2801                             JR        Z,DECC1_1      ; B = 3
+0C15Ah                                                           ;     cp #20
+0C15Ah                                                           ;     jr z, decc20 ; B = 3 gdy miesiac >= 3 lub B = 4 gdy styczen i luty 
+0C15Ah                                                           ;    
+0C15Ah                                                           ;     cp #21 ; 1.1.2100 to piatek
+0C15Ah                                                           ;     jr z, decc21 ; B = 7
+0C15Ah                                            
+0C15Ah C9                               RET                      ; powrot z procedury <spr_NP> jesli jesli lata inne niz 1700, 1800.. j.w.
+0C15Bh                                            
+0C15Bh                                                           ; 1700 nie byl przestepny         
+0C15Bh 79         DECC1_1:              LD        A,C
+0C15Ch 3D         DECC1_2:              DEC       A
+0C15Dh 2002                             JR        NZ,DECC1_3
+0C15Fh 3E07                             LD        A,7            ; dni liczone 1-PN, 2-WT...7-ND
+0C161h            DECC1_3:                        
+0C161h 10F9                             DJNZ      DECC1_2
+0C163h                                                           ; jesli styczen lub luty, zwieksz C- dzien tygodnia
+0C163h B7                               OR        A              ; CY = 0
+0C164h 2A11FE                           LD        HL,(DATA_M+1)  ; H = rok zadany, L = miesiac zadany
+0C167h ED52                             SBC       HL,DE
+0C169h 4F                               LD        C,A
+0C16Ah D0                               RET       NC             ; miesiac > 3 
+0C16Bh                                                           ; styczen lub luty
+0C16Bh 3C         DECC1_20:             INC       A
+0C16Ch 4F                               LD        C,A
+0C16Dh FE08                             CP        8
+0C16Fh C0                               RET       NZ
+0C170h 0E01                             LD        C,1
+0C172h C9                               RET                      ; powrot z procedury <spr_NP>
+0C173h                                            
+0C173h 79         DECC20:               LD        A,C
+0C174h 18F5                             JR        DECC1_20
+0C176h                                            
+0C176h                                            
+0C176h            DECC21:                                        ; OK od 2100 do 28.2.2200
+0C176h 0607                             LD        B,7
+0C178h 18E1                             JR        DECC1_1
+0C17Ah                                            
+0C17Ah            SPR5_14:                                       ; jesli data miedzy 5-14.10.1582 to blad
+0C17Ah                                                           ; w HL rok zadany
+0C17Ah B7                               OR        A
+0C17Bh 118215                           LD        DE,#1582
+0C17Eh ED52                             SBC       HL,DE
+0C180h C0                               RET       NZ
+0C181h 3A11FE                           LD        A,(DATA_M+1)   ; miesiac zadany
+0C184h FE10                             CP        #10            ; czy pazdziernik
+0C186h C0                               RET       NZ
+0C187h 3A10FE                           LD        A,(DATA_M)     ;  dzien zadany
+0C18Ah FE15                             CP        #15            ; nie ma dni 5-14.10
+0C18Ch D0                               RET       NC             ; dzien >= 15
+0C18Dh                                                           ; dzien < od 15
+0C18Dh            SPR5_1:                         
+0C18Dh FE05                             CP        5
+0C18Fh D8                               RET       C              ; dzien <= 4 ; jest OK
+0C190h            SPR5_1A:                        
+0C190h C374C0                           JP        UD1_ERR        ; error
+0C193h                                            
+0C193h            SPR_LUTY:                       
+0C193h D9                               EXX       
+0C194h 08                               EX        AF,AF'
+0C195h                                            
+0C195h B7                               OR        A              ; CY = 0 wazne przy sbc !!
+0C196h 210017                           LD        HL,#1700
+0C199h ED5B12FE                         LD        DE,(DATA_M+2)  ; rok zadany
+0C19Dh ED52                             SBC       HL,DE
+0C19Fh 28EF                             JR        Z,SPR5_1A
+0C1A1h                                            
+0C1A1h B7                               OR        A
+0C1A2h 210018                           LD        HL,#1800
+0C1A5h ED52                             SBC       HL,DE
+0C1A7h 28E7                             JR        Z,SPR5_1A
+0C1A9h                                            
+0C1A9h B7                               OR        A
+0C1AAh 210019                           LD        HL,#1900
+0C1ADh ED52                             SBC       HL,DE
+0C1AFh 28DF                             JR        Z,SPR5_1A
+0C1B1h 08                               EX        AF,AF'
+0C1B2h D9                               EXX       
+0C1B3h C9                               RET       
+0C1B4h                                            
+0C1B4h            SPR_X_1582:                                    ; jesli 5.10.1582 to zwieksz dzien na 15
+0C1B4h                                                           ; A - aktualny dzien
+0C1B4h FE05                             CP        5
+0C1B6h C0                               RET       NZ
+0C1B7h                                                           ; sprawdz miesiac, jest w D, czy pazdziernik
+0C1B7h DD6F                             LD        IXL,A          ; ochrona dnia miesiaca
+0C1B9h 78                               LD        A,B            ; B - aktualnie obliczany miesiac
+0C1BAh FE10                             CP        #10
+0C1BCh DD7D                             LD        A,IXL
+0C1BEh C0                               RET       NZ
+0C1BFh D9                               EXX                      ; ochrona HL, DE, BC
+0C1C0h B7                               OR        A
+0C1C1h 2A12FE                           LD        HL,(DATA_M+2)
+0C1C4h 118215                           LD        DE,#1582
+0C1C7h ED52                             SBC       HL,DE
+0C1C9h D9                               EXX       
+0C1CAh C0                               RET       NZ
+0C1CBh 3E15                             LD        A,#15
+0C1CDh C9                               RET       
+0C1CEh                                                           ; w kalendarzu gregorianskim, co 400 lat dni tygodnia
+0C1CEh                                                           ; w roku sa identyczne ! np. w 1600 - 2000 - 2400,
+0C1CEh                                                           ; 1700 - 2100 - 2500 itd, 1800 - 2200 - 2600 itd, 1900 - 2300 - 2700 itd
+0C1CEh                                                           ; i to wykorzystamy do obliczen lat do 9999 ! czy swiat bedzie jeszcze istnial ???
+0C1CEh                                            
+0C1CEh            KOR_R:                                         ; sprawdz rok i skoryguj zadany rok na czas obl. procedury <SROK>   
+0C1CEh 3A13FE                           LD        A,(DATA_M+3)   ; stulecie
+0C1D1h FE20                             CP        #20
+0C1D3h D8                               RET       C
+0C1D4h            KOR_R1:                         
+0C1D4h D604                             SUB       4              ; "400" lat
+0C1D6h 27                               DAA       
+0C1D7h FE04                             CP        4
+0C1D9h 30F9                             JR        NC,KOR_R1
+0C1DBh                                                           ; A - ile dodac do 16xx i ten rok wprowadz jako zadany
+0C1DBh 0E16                             LD        C,#16
+0C1DDh 81                               ADD       A,C
+0C1DEh 27                               DAA       
+0C1DFh 3213FE                           LD        (DATA_M+3),A
+0C1E2h C9                               RET       
+0C1E3h                                            
+0C1E3h                                                           ;Opoznienie ok. 10 msek
+0C1E3h 3E05       DEL10:                LD        A,5            ;5*2msek=10msek
+0C1E5h 32E8FF                           LD        (LCI),A
+0C1E8h 3AE8FF     DE11:                 LD        A,(LCI)
+0C1EBh B7                               OR        A
+0C1ECh 20FA                             JR        NZ,DE11
+0C1EEh C9                               RET       
+0C1EFh                                            
+0C1EFh 0100060383 WZOR_DR1:             DEFB      1,0,6,3,83H,15H,6,1,0,20H,6,4
+0C1FBh                                                           ; komunikaty na CA80
+0C1FBh 505050D0   R_R:                  DEFB      #50,#50,#50,#D0; r r r r. -rok
+0C1FFh 5EDE       DD:                   DEFB      #5E,#DE        ;          ; d d.     - dzien
+0C201h 54D4FF     MM:                   DEFB      #54,#D4,255    ; nn.      - miesiac 
+0C204h DDE2                             DEFB      0DDH,0E2H      ; DDE2 - marker nazwy programu, jesli mamy LCD i magazyn programow np. 
+0C206h                                                           ; https://github.com/Roman-tor/programy-magazyn-w-CA80/blob/main/1.README.md
+0C206h 204B414C45                       DEFM      " KALENDARZ WIECZNY",255; nazwa programu
+0C219h                                            
